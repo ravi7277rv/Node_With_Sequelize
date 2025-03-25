@@ -44,6 +44,14 @@ export const User = sequelize.define('User', {
       len: { args: [10], msg: "Phone no. should be of 10 digits" },
     }
   },
+  password: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    validate: {
+      notNull: { msg: "User password is required" },
+      min: { args: [8], msg: "Password should be atleast of 10 character" }
+    }
+  },
   country: {
     type: DataTypes.STRING(20),
     allowNull: true,

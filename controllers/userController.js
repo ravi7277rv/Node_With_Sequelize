@@ -1,30 +1,64 @@
 import { User } from "../models/userModels.js";
+import { HashPassword } from "../utils/HashPassword.js";
+import { ValidateEmail } from "../utils/ValidateEmail.js";
+import { ValidatePhoneNo } from "../utils/ValidatePhoneNo.js";
 
 export const registerUser = async (req, res) => {
     try {
-        const { fname, lname, email_id, phone } = req.body;
-        console.log(fname, lname, email_id ,phone)
-        if (!fname || !lname || !email_id || !phone) {
-            return res.status(400)
-                .json({
-                    message: "Please provide your detials"
-                })
-        }
-
-        const isUserExist = await User.findOne({email:email_id});
-        if(isUserExist){
+        const { fname, lname, email, password, phone } = req.body;
+        console.log(fname, lname, email, password, phone)
+        if (!fname || !lname || !email || !password || !phone) {
             return res
                 .status(400)
                 .json({
-                    message:"User exist with this email_id"
+                    message: "One or more required fields are empty"
                 })
         }
 
+        const validEmail = ValidateEmail(email);
+        console.log(validEmail)
+        if (!validEmail) {
+            return res
+                .status(400)
+                .json({
+                    message: "Invalid Email Id"
+                })
+        }
+
+        const isUserExist = await User.findOne({ email: email });
+        console.log(isUserExist)
+        if (isUserExist) {
+            return res
+                .status(400)
+                .json({
+                    message: "User exist with this email_id"
+                })
+        }
+
+        const validPhone = ValidatePhoneNo(phone);
+        console.log(validPhone)
+        if (!validPhone) {
+            return res
+                .status(400)
+                .json({
+                    message: "Phone no. should be of 10 digits"
+                })
+        }
+        if (password.length < 8) {
+            return res
+                .status(400)
+                .json({
+                    message: "Password should be more than 8 chars"
+                })
+        }
+        const hashPassword = HashPassword(password);
+        console.log(hashPassword)
         const newUser = await User.create({
             firstname: fname,
             lastname: lname,
-            email: email_id,
-            phone:phone
+            email: email,
+            phone: phone,
+            password: hashPassword
         })
 
         let user = newUser.toJSON();
@@ -32,7 +66,7 @@ export const registerUser = async (req, res) => {
         return res
             .status(201)
             .json({
-                message:"A user has been created",
+                message: "A user has been created",
                 user
             })
 
@@ -41,102 +75,102 @@ export const registerUser = async (req, res) => {
         return res
             .status(500)
             .json({
-                message: "Internal Server Error",error
+                message: "Internal Server Error", error
             })
     }
 }
 
-export const getAllUsers = async(req, res) => {
+export const getAllUsers = async (req, res) => {
     try {
 
         const user = await User.findAll();
 
         return res.status(200)
             .json({
-                message:"All Users has been fetched",
+                message: "All Users has been fetched",
                 user
             })
-        
+
     } catch (error) {
         return res
             .status(500)
             .json({
-                message:"Internal Server Error",error
+                message: "Internal Server Error", error
             })
     }
 }
 
-export const updateUserDetails = async(req, res) => {
+export const updateUserDetails = async (req, res) => {
     debugger
     try {
 
         const { id } = req.params;
-        const {lname} = req.body;
-        if(!id){
+        const { lname } = req.body;
+        if (!id) {
             return res
                 .status(400)
                 .json({
-                    message:"Id is required",
+                    message: "Id is required",
                 })
         }
 
-        if(!lname){
+        if (!lname) {
             return res
                 .status(400)
                 .json({
-                    message:"Please provide lastName"
+                    message: "Please provide lastName"
                 })
         }
 
         const updated = await User.update(
-            {lastName: lname},
-            {where : {id : parseInt(id)}}
+            { lastName: lname },
+            { where: { id: parseInt(id) } }
         )
 
         return res
             .status(200)
             .json({
-                message:"User updated successfully",
+                message: "User updated successfully",
                 updated
             })
-        
+
     } catch (error) {
         return res
             .status(500)
             .json({
-                message:"Internal Server Error"
+                message: "Internal Server Error"
             })
     }
 }
 
-export const deleteUser = async(req, res) => {
+export const deleteUser = async (req, res) => {
     try {
 
         const { id } = req.params;
-        if(!id){
+        if (!id) {
             return res
                 .status(400)
                 .json({
-                    message:"Please provide the id of the user"
+                    message: "Please provide the id of the user"
                 })
         }
 
         const deletedUser = await User.destroy({
-            where:{id : id}
+            where: { id: id }
         });
 
         return res
             .status(200)
             .json({
-                message:"User has been deleted Successfully",
+                message: "User has been deleted Successfully",
                 deletedUser
             })
-        
+
     } catch (error) {
         return res
             .status(500)
             .json({
-                message:"Internal Server Error",error
+                message: "Internal Server Error", error
             })
     }
 }
