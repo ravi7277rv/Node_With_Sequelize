@@ -6,7 +6,6 @@ import { ValidatePhoneNo } from "../utils/ValidatePhoneNo.js";
 export const registerUser = async (req, res) => {
     try {
         const { fname, lname, email, password, phone } = req.body;
-        console.log(fname, lname, email, password, phone)
         if (!fname || !lname || !email || !password || !phone) {
             return res
                 .status(400)
@@ -16,7 +15,6 @@ export const registerUser = async (req, res) => {
         }
 
         const validEmail = ValidateEmail(email);
-        console.log(validEmail)
         if (!validEmail) {
             return res
                 .status(400)
@@ -26,7 +24,6 @@ export const registerUser = async (req, res) => {
         }
 
         const isUserExist = await User.findOne({ email: email });
-        console.log(isUserExist)
         if (isUserExist) {
             return res
                 .status(400)
@@ -36,7 +33,6 @@ export const registerUser = async (req, res) => {
         }
 
         const validPhone = ValidatePhoneNo(phone);
-        console.log(validPhone)
         if (!validPhone) {
             return res
                 .status(400)
@@ -52,7 +48,6 @@ export const registerUser = async (req, res) => {
                 })
         }
         const hashPassword = HashPassword(password);
-        console.log(hashPassword)
         const newUser = await User.create({
             firstname: fname,
             lastname: lname,

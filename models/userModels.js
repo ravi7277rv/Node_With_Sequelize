@@ -85,6 +85,7 @@ export const User = sequelize.define('User', {
 }, {
   timestamps: true,
   tableName: 'users',
+  schema: 'test_schema',
 });
 
 

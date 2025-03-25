@@ -12,7 +12,7 @@ let dialect = process.env.DB_DIALECT;
 //creating a new sequelize instance
 export const sequelize = new Sequelize(database_name,username,password,{
     host:host,
-    dialect:dialect
+    dialect:dialect,
 });
 
 export const DBConnection = async() => {
