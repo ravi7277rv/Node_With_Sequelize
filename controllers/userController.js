@@ -2,20 +2,29 @@ import { User } from "../models/userModels.js";
 
 export const registerUser = async (req, res) => {
     try {
-debugger
-        const { fname, lname, email_id } = req.body;
-        console.log(fname, lname, email_id)
-        if (!fname || !lname || !email_id) {
+        const { fname, lname, email_id, phone } = req.body;
+        console.log(fname, lname, email_id ,phone)
+        if (!fname || !lname || !email_id || !phone) {
             return res.status(400)
                 .json({
                     message: "Please provide your detials"
                 })
         }
 
+        const isUserExist = await User.findOne({email:email_id});
+        if(isUserExist){
+            return res
+                .status(400)
+                .json({
+                    message:"User exist with this email_id"
+                })
+        }
+
         const newUser = await User.create({
-            firstName: fname,
-            lastName: lname,
-            email: email_id
+            firstname: fname,
+            lastname: lname,
+            email: email_id,
+            phone:phone
         })
 
         let user = newUser.toJSON();
