@@ -1,6 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import fileUpload from 'express-fileupload';
 import { DBConnection } from './config/dbConnection.js';
 import { config } from 'dotenv';
 config();
@@ -10,7 +12,10 @@ const app = express();
 
 app.use(bodyParser.json({limit:"10mb"}));
 app.use(bodyParser.urlencoded({limit:"10mb", extended:false}));
+
 app.use(cors());
+app.use(cookieParser());
+app.use(fileUpload())
 
 //default route for checking whether api is running or not
 app.get("/", (req, res) => {

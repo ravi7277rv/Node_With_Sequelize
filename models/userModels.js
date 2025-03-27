@@ -82,6 +82,14 @@ export const User = sequelize.define('User', {
     allowNull: false,
     defaultValue: 'active'
   },
+  resetPasswordToken :{
+    type:DataTypes.TEXT,
+    allowNull:true
+  },
+  resetPasswordTokenExpiry:{
+    type:DataTypes.TEXT,
+    allowNull:true
+  }
 }, {
   timestamps: true,
   tableName: 'users',

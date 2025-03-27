@@ -14,6 +14,10 @@ export const IsAuthenticated = async (req, res, next) => {
         })
     }
 
+    if (tokenFromHeaders.startsWith("Bearer ")) {
+        tokenFromHeaders = tokenFromHeaders.split(" ")[1];
+    }
+
     if (tokenFromHeaders !== tokenFromCookies) {
         return res
             .status(400)
@@ -22,17 +26,18 @@ export const IsAuthenticated = async (req, res, next) => {
             })
     }
     try {
-        let decoded = jwt.verify(tokenFromHeaders, process.env.JWT_SECRET);
-        let id = decoded.user._id;
-        const user = await User.findOne({_id:id});
-        if(!user){
-            return res  
-                .status(401)
-                .json({
-                    message:"User not found"
-                })
+        const decoded = jwt.verify(tokenFromHeaders, process.env.JWT_SECRET);
+        const email = decoded.user.email;
+        const user = await User.findOne({where : {email:email}, attributes: { exclude: ['password'] }, });
+        if (!user) {
+            return res
+            .status(401)
+            .json({
+                message: "User not found"
+            })
         }
-        req.user = user;
+        let userDetails = user.toJSON();
+        req.user = userDetails;
         next();
     } catch (error) {
         return res
@@ -46,11 +51,11 @@ export const IsAuthenticated = async (req, res, next) => {
 
 export const AuthorizeRole = (...roles) => {
     return (req, res, next) => {
-        if(!roles.includes(req.user.role)){
+        if (!roles.includes(req.user.role)) {
             return res
                 .status(403)
                 .json({
-                    message:"Access denied. You didn't have permission."
+                    message: "Access denied. You didn't have permission."
                 })
         }
         next();

@@ -12,4 +12,4 @@ export const GenerateToken = (user) => {
     } catch (error) {
         throw new Error('Failed to generate token',error)
     }
-}
+} 
