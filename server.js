@@ -28,9 +28,13 @@ app.get("/", (req, res) => {
 
 //importing the route
 import user from './routes/userRoutes.js';
+import seller from './routes/sellerRoutes.js';
+import product from './routes/productRoutes.js';
 
 //using the router 
-app.use("/api/v1",user)
+app.use("/api/v1",user);
+app.use("/api/v1",seller);
+app.use("/api/v1",product)
 
 
 app.listen(process.env.PORT,() => {

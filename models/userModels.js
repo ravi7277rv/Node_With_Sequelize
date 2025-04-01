@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import { sequelize } from "../config/dbConnection.js";
+import { sequelize } from "../config/sequelizeInstance.js";
 
 export const User = sequelize.define('User', {
 
@@ -82,19 +82,19 @@ export const User = sequelize.define('User', {
     allowNull: false,
     defaultValue: 'active'
   },
-  resetPasswordToken :{
-    type:DataTypes.TEXT,
-    allowNull:true
+  resetPasswordToken: {
+    type: DataTypes.TEXT,
+    allowNull: true
   },
-  resetPasswordTokenExpiry:{
-    type:DataTypes.TEXT,
-    allowNull:true
+  resetPasswordTokenExpiry: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
   timestamps: true,
-  tableName: 'users',
   schema: 'test_schema',
-});
+}
+);
 
 
 

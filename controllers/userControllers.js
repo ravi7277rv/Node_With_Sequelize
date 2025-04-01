@@ -6,6 +6,8 @@ import { ValidateEmail } from "../utils/ValidateEmail.js";
 import { ComparePassword, ValidatePassword } from "../utils/ValidatePassword.js";
 import { ValidatePhoneNo } from "../utils/ValidatePhoneNo.js";
 import { config } from "dotenv";
+import { ResetPasswordTokenGeneration } from "../utils/ResetPasswordTokenGeneration.js";
+// import { SendEmail } from "../utils/SendEmail.js";
 
 config();
 
@@ -111,7 +113,7 @@ export const loginUser = async (req, res) => {
                 })
         }
         let userData = user.toJSON();
-        let validPassword = ValidatePassword(password, userData.password)
+        let validPassword = await ValidatePassword(password, userData.password)
         if (!validPassword) {
             return res
                 .status(400)
@@ -274,12 +276,123 @@ export const updateUserPassword = async (req, res) => {
     }
 }
 
-export const updateUserDetails = async (req, res) => {
-    debugger
+//Forget Password
+export const forgotPassword = async (req, res) => {
     try {
+        const { email } = req.body;
+        if (!email) {
+            return res
+                .status(400)
+                .json({
+                    message: "Enter your email, which linked with account."
+                })
+        }
 
+        const user = await User.findOne({ where: { email: email } });
+        if (!user) {
+            return res
+                .status(404)
+                .json({
+                    message: "User does not exist"
+                })
+        }
+
+        //Handled the token generation for resetpassword
+        const { resetToken, tokenExpiry } = ResetPasswordTokenGeneration();
+        console.log(resetToken, tokenExpiry)
+
+        await User.update(
+            {
+                resetPasswordToken: resetToken,
+                resetPasswordTokenExpiry: tokenExpiry.toString()
+            },
+            {
+                where: {
+                    email: email
+                }
+            }
+        )
+
+        //Generating URL for the password reset
+        const resetPasswordURL = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
+        const htmlContent = `Your password reset URL is :- \n\n ${resetPasswordURL} \n\n If you have not requested then please ignore it.`;
+
+        // const sendEmailResponse = await SendEmail(email, htmlContent);
+        // return res
+        //     .status(200)
+        //     .json({
+        //         message: `A mail has been sent to your gmail accout for password resetting.`,
+        //         sendEmailResponse
+        //     })
+    } catch (error) {
+
+    }
+}
+
+//Reset Password
+export const resetPassword = async (req, res) => {
+    try {
+        const { password } = req.body;
+        if (!password) {
+            return res
+                .status(400)
+                .json({
+                    message: "Please Enter your Password"
+                })
+        }
+        const token = req.params.resetToken;
+        const user = await User.findOne({ where: { resetPasswordToken: token } })
+        if (!user) {
+            return res
+                .status(404)
+                .json({
+                    message: "User doesn't exist"
+                })
+        }
+        const userDetails = user.toJSON()
+        const currentTime = new Date().getTime();
+        const expireTime = user.resetPasswordTokenExpiry;
+        if (expireTime < currentTime) {
+            return res
+                .status(400)
+                .json({
+                    message: "Password reset token has expired. \n\n Please request a new password reset link."
+                })
+        }
+
+        let hashPassword = HashPassword(password);
+        await User.update(
+            {
+                password: hashPassword,
+                resetPasswordToken: null,
+                resetPasswordTokenExpiry: null
+            },
+            {
+                where: {
+                    email: userDetails.email
+                }
+            }
+        )
+
+        return res
+            .status(200)
+            .json({
+                message: `Password reset successfully`
+            })
+    } catch (error) {
+        return res
+            .status(500)
+            .json({
+                message: "Internal Server Error",
+                error: error
+            })
+    }
+}
+
+//Update User Details
+export const updateUserDetails = async (req, res) => {
+    try {
         const { id } = req.params;
-        const { lname } = req.body;
         if (!id) {
             return res
                 .status(400)
@@ -288,17 +401,45 @@ export const updateUserDetails = async (req, res) => {
                 })
         }
 
-        if (!lname) {
+        const { firstname, lastname, email, phone } = req.body;
+        if (!firstname || !lastname || !email || !phone) {
             return res
                 .status(400)
                 .json({
-                    message: "Please provide lastName"
+                    message: "Enter your Details"
                 })
         }
 
-        const updated = await User.update(
-            { lastName: lname },
-            { where: { id: parseInt(id) } }
+        const isValidEmail = ValidateEmail(email);
+        if(!isValidEmail){
+            return res
+                .status(400)
+                .json({
+                    message:"Invalid email formate"
+                })
+        }
+
+        const isValidPhone = ValidatePhoneNo(phone);
+        if(!isValidPhone){
+            return res
+                .status(400)
+                .json({
+                    message:"Phone no. should be of 10 digits only."
+                })
+        }
+
+        await User.update(
+            {
+                firstname: firstname,
+                lastname: lastname,
+                email: email,
+                phone: phone,
+            },
+            {
+                where: {
+                    id: parseInt(id)
+                }
+            }
         )
 
         return res
@@ -317,6 +458,7 @@ export const updateUserDetails = async (req, res) => {
     }
 }
 
+//Delete an User Profile
 export const deleteUser = async (req, res) => {
     try {
 
