@@ -65,12 +65,13 @@ export const registerUser = async (req, res) => {
             password: hashPassword
         })
 
-        let user = newUser.toJSON();
+        const user = newUser.toJSON();
 
         return res
             .status(201)
             .json({
                 message: "User registered Successfully",
+                user
             })
 
 

@@ -6,9 +6,9 @@ export const Seller = sequelize.define('Seller', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
-        primaryKey: true,
+        primaryKey: true, 
     },
-    name: {
+    ownerName: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {

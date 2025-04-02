@@ -10,12 +10,12 @@ config();
 //Register Users
 export const registerSeller = async (req, res) => {
     try {
-        const { name, email, password, storeName, phone, address } = req.body;
-        if (!name || !email || !password || !storeName || !phone || !address) {
+        const { ownerName, email, password, storeName, phone, address } = req.body;
+        if (!ownerName || !email || !password || !storeName || !phone || !address) {
             return res
                 .status(400)
                 .json({
-                    message: "One or more required fields are empty"
+                    message: "Provide the Seller Details!"
                 })
         }
 
@@ -54,7 +54,7 @@ export const registerSeller = async (req, res) => {
         }
         const hashPassword = HashPassword(password);
         const newUser = await Seller.create({
-            name: name,
+            ownerName: ownerName,
             email: email,
             password: hashPassword,
             storeName: storeName,
@@ -68,6 +68,7 @@ export const registerSeller = async (req, res) => {
             .status(201)
             .json({
                 message: "Seller registered Successfully",
+                seller
             })
 
 

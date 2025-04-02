@@ -1,5 +1,5 @@
 import { sequelize } from "./sequelizeInstance.js";
-// import { CartItem, WishlistItem, Seller, Product, Review ,  Cart,  Wishlist,  } from "./associations.js";
+import { CartItem, WishlistItem, Seller, Product, Review ,  Cart,  Wishlist, Order, OrderItem  } from "./associations.js";
 
 export const DBConnection = async() => {
     try {
